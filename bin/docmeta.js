@@ -1,9 +1,12 @@
+#! /usr/bin/env node
+
 const path = require('path');
 const simpleGit= require('simple-git');
 const git = simpleGit(__dirname);
 const fs = require('fs-extra');
 const del = require('del');
 const pwd = path.resolve(process.cwd());
+const q = require('q');
 
 let options = {
     repoURL: "https://github.com/OpherV/Incheon.git",
@@ -23,12 +26,12 @@ const DIRS = {
 
 
 //cleanup dirs
-// fs.removeSync(path.join(pwd, DIRS.out));
+fs.removeSync(path.join(pwd, DIRS.out));
 fs.removeSync(path.join(pwd, DIRS.temp));
 fs.removeSync(path.join(pwd, DIRS.temp_deploy));
 
 //recreate out dir
-// fs.mkdirpSync(path.join(pwd, DIRS.out));
+fs.mkdirpSync(path.join(pwd, DIRS.out));
 fs.mkdirpSync(path.join(pwd, DIRS.temp));
 
 
@@ -39,25 +42,31 @@ let docVersions = [];
 
 
 function deployDocs(){
+    console.log(`cloning from ${options.deployRepoURL}`);
     deployGit.clone(
         options.deployRepoURL,
         path.join(pwd, DIRS.temp_deploy),
         [],afterClone);
 
     function afterClone(){
+        console.log(`Done cloning`);
+
         //remove everything but the git
         del.sync(['!'+path.join(DIRS.temp_deploy,'.git/'), path.join(DIRS.temp_deploy,'*') ]);
         del.sync([path.join(DIRS.temp_deploy,'.gitignore')]);
-        fs.copySync(DIRS.out, DIRS.temp_deploy);
+        fs.copySync(path.join(pwd, DIRS.out), path.join(pwd, DIRS.temp_deploy));
         deployGit.add('./*').commit("Autoupdate docs").then(afterCommit);
     }
 
     function afterCommit(){
-
+        console.log("Done comitting. Pushing");
+        deployGit.push();
     }
 }
 
 function addTravisSSHKey(){
+    let deferred = q.defer();
+
     let ENCRYPTED_KEY=`encrypted_${process.env.ENCRYPTION_LABEL}_key`;
     let ENCRYPTED_IV=`encrypted_${process.env.ENCRYPTION_LABEL}_key`;
 
@@ -70,17 +79,18 @@ function addTravisSSHKey(){
     }
 
     function afterSSHAdd(){
-
+        deferred.resolve();
     }
+
+    return deferred.promise;
 }
-
-console.log("test");
-
-// deployDocs();
-// generateDocsForAllVersions();
 
 
 function generateDocsForAllVersions(){
+    let deferred = q.defer();
+
+    let promises = [];
+
     git.tags(function(err,tags){
         //push all tags to be built, except if defined otherwise in the ignoreTags options
         for (let tag of tags.all){
@@ -92,13 +102,27 @@ function generateDocsForAllVersions(){
 
 
         for (let version of docVersions) {
-            generateDocsForVersion(version);
+            console.log(`generating docs for version ${version}`);
+            let promise = generateDocsForVersion(version).then(function(){
+                console.log(`done generating docs for version ${version}`);
+            });
+
+            promises.push(promise);
         }
+
+        q.all(promises).then(function(){
+            deferred.resolve();
+        })
+
     });
+
+    return deferred.promise;
 }
 
 
 function generateDocsForVersion(name){
+    let deferred = q.defer();
+
     let versionPath = getVersionPath(name);
 
     tempGit.clone(
@@ -123,7 +147,10 @@ function generateDocsForVersion(name){
     function afterBuildDocsCommand(){
         process.chdir(pwd);
         fs.copySync(path.join(versionPath,DIRS.inner_out), path.join(DIRS.out,name));
+        deferred.resolve();
     }
+
+    return deferred.promise;
 }
 
 function getVersionPath(name){
@@ -139,3 +166,14 @@ function run_cmd(cmd, args, callBack ) {
     child.stdout.on('data', function (buffer) { resp += buffer.toString() });
     child.stdout.on('end', function() { callBack (resp) });
 }
+
+addTravisSSHKey().then(function(){
+   return generateDocsForAllVersions();
+}.then(function(){
+    return deployDocs();
+}));
+
+// generateDocsForAllVersions().then(function(){
+//     console.log("deploying docs");
+//     return deployDocs();
+// });

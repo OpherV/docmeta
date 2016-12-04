@@ -2,9 +2,9 @@
   "name": "docmeta",
   "version": "1.0.0",
   "description": "A tool to generate documentation for multiple tags/branches and deploy to ghpages",
-  "main": "index.js",
+  "main": "bin/docmeta.js",
   "bin": {
-    "docmeta": "./index.js"
+    "docmeta": "bin/docmeta.js"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -18,5 +18,11 @@
   "bugs": {
     "url": "https://github.com/OpherV/docmeta/issues"
   },
-  "homepage": "https://github.com/OpherV/docmeta#readme"
+  "homepage": "https://github.com/OpherV/docmeta#readme",
+  "dependencies": {
+    "del": "^2.2.2",
+    "fs-extra": "^1.0.0",
+    "q": "^1.4.1",
+    "simple-git": "^1.64.0"
+  }
 }
