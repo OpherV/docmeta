@@ -84,29 +84,6 @@ function deployDocs(){
     return deferred.promise;
 }
 
-function addTravisSSHKey(){
-    let deferred = q.defer();
-    console.log("adding SSH key");
-
-    let ENCRYPTED_KEY=`encrypted_${process.env.ENCRYPTION_LABEL}_key`;
-    let ENCRYPTED_IV=`encrypted_${process.env.ENCRYPTION_LABEL}_key`;
-
-    run_cmd("openssl",["aes-256-cbc", "-K", ENCRYPTED_KEY, "-iv", ENCRYPTED_IV, "-in",
-        "deploy_key.enc", "-out", "deploy_key", "-d"], afterOpenSSL);
-
-    function afterOpenSSL(resp){
-        console.log(resp);
-
-        fs.chmodSync('deploy_key', '600');
-        fs.copySync('deploy_key', '~/.ssh/id_rsa');
-
-        deferred.resolve();
-    }
-
-    return deferred.promise;
-}
-
-
 let generateRedirectFile = wrapSyncFunctionWithPromise(function(data){
     let redirectVersion = data.latest?data.latest:data.versions[0];
 
@@ -216,7 +193,6 @@ function run_cmd(cmd, args, callBack ) {
 let defer = q.defer();
 p = defer.promise;
 if (!argv.nocleanup){ p = p.then(cleanup); }
-if (argv.travis){ p = p.then(addTravisSSHKey); }
 p = p.then(generateDocsForAllVersions);
 p = p.then(generateRedirectFile);
 if (argv.deploy){ p = p.then(deployDocs); }
