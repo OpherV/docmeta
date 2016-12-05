@@ -69,6 +69,8 @@ function deployDocs(){
         fs.copySync(path.join(pwd, DIRS.out), path.join(pwd, DIRS.temp_deploy));
 
         deployGit = simpleGit(path.join(pwd, DIRS.temp_deploy))
+            .addConfig('user.name', 'Travis CI')
+            .addConfig('user.email', process.env.COMMIT_AUTHOR_EMAIL)
             .add('./*')
             .commit("Autoupdate docs").then(afterCommit);
     }
