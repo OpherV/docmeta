@@ -98,19 +98,7 @@ function addTravisSSHKey(){
         console.log(resp);
 
         fs.chmodSync('deploy_key', '600');
-        console.log("running ssh-agent");
-        run_cmd("eval",["`ssh-agent -s`"], afterSSHAgent);
-    }
-
-    function afterSSHAgent(resp){
-        console.log(resp);
-
-        console.log("running ssh-add");
-        run_cmd("ssh-add",["deploy_key"], afterSSHAdd);
-    }
-
-    function afterSSHAdd(resp){
-        console.log(resp);
+        fs.copySync('deploy_key', '~/.ssh/id_rsa');
 
         deferred.resolve();
     }
