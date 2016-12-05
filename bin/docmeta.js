@@ -12,7 +12,7 @@ const argv = require('yargs').argv;
 
 let options = {
     repoURL: "https://github.com/OpherV/Incheon.git",
-    deployRepoURL: "https://github.com/OpherV/incheon-docs-site.git",
+    deployRepoURL: "git@github.com:OpherV/incheon-docs-site.git",
     buildDocCommand: "npm",
     buildDocCommandArgs: "run docs",
     ignoreTags: ['r0.1.0', 'r0.2.0']
