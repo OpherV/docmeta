@@ -97,9 +97,6 @@ function addTravisSSHKey(){
     function afterOpenSSL(resp){
         console.log(resp);
 
-        let contents = fs.readFileSync('deploy_key').toString();
-        console.log(contents);
-
         fs.chmodSync('deploy_key', '600');
         fs.copySync('deploy_key', '~/.ssh/id_rsa');
 
