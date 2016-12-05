@@ -94,12 +94,24 @@ function addTravisSSHKey(){
     run_cmd("openssl",["aes-256-cbc", "-K", ENCRYPTED_KEY, "-iv", ENCRYPTED_IV, "-in",
         "deploy_key.enc", "-out", "deploy_key", "-d"], afterOpenSSL);
 
-    function afterOpenSSL(){
+    function afterOpenSSL(resp){
+        console.log(resp);
+
         fs.chmodSync('deploy_key', '600');
+        console.log("running ssh-agent");
+        run_cmd("eval",["`ssh-agent -s`"], afterSSHAgent);
+    }
+
+    function afterSSHAgent(resp){
+        console.log(resp);
+
+        console.log("running ssh-add");
         run_cmd("ssh-add",["deploy_key"], afterSSHAdd);
     }
 
-    function afterSSHAdd(){
+    function afterSSHAdd(resp){
+        console.log(resp);
+
         deferred.resolve();
     }
 
@@ -216,7 +228,7 @@ function run_cmd(cmd, args, callBack ) {
 let defer = q.defer();
 p = defer.promise;
 if (!argv.nocleanup){ p = p.then(cleanup); }
-// if (argv.travis){ p = p.then(addTravisSSHKey); }
+if (argv.travis){ p = p.then(addTravisSSHKey); }
 p = p.then(generateDocsForAllVersions);
 p = p.then(generateRedirectFile);
 if (argv.deploy){ p = p.then(deployDocs); }
