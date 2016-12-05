@@ -21,7 +21,7 @@ let options = {
 
 const DIRS = {
     out: "docs_out",
-    inner_out: "docs-out",
+    inner_out: "docs_out",
     temp: "docmeta_temp",
     temp_deploy: "docmeta_temp_deploy",
 };
