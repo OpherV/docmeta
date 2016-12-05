@@ -86,6 +86,7 @@ function deployDocs(){
 
 function addTravisSSHKey(){
     let deferred = q.defer();
+    console.log("adding SSH key");
 
     let ENCRYPTED_KEY=`encrypted_${process.env.ENCRYPTION_LABEL}_key`;
     let ENCRYPTED_IV=`encrypted_${process.env.ENCRYPTION_LABEL}_key`;
@@ -215,7 +216,7 @@ function run_cmd(cmd, args, callBack ) {
 let defer = q.defer();
 p = defer.promise;
 if (!argv.nocleanup){ p = p.then(cleanup); }
-if (argv.travis){ p = p.then(addTravisSSHKey); }
+// if (argv.travis){ p = p.then(addTravisSSHKey); }
 p = p.then(generateDocsForAllVersions);
 p = p.then(generateRedirectFile);
 if (argv.deploy){ p = p.then(deployDocs); }
