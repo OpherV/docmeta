@@ -64,7 +64,7 @@ function deployDocs(){
         console.log(`Done cloning`);
 
         //remove everything but the git
-        del.sync(['!'+path.join(DIRS.temp_deploy,'.git/'), path.join(DIRS.temp_deploy,'*') ]);
+        del.sync(['!'+path.join(DIRS.temp_deploy,'.git/'), '!'+path.join(DIRS.temp_deploy,'CNAME'), path.join(DIRS.temp_deploy,'*') ]);
         del.sync([path.join(DIRS.temp_deploy,'.gitignore')]);
         fs.copySync(path.join(pwd, DIRS.out), path.join(pwd, DIRS.temp_deploy));
 
