@@ -178,7 +178,7 @@ function wrapSyncFunctionWithPromise(func){
 }
 
 function run_cmd(cmd, args, callBack ) {
-    let spawn = require('child_process').spawn;
+    let spawn = require('cross-spawn');
     let child = spawn(cmd, args);
     let resp = "";
 

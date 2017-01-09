@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/OpherV/docmeta#readme",
   "dependencies": {
+    "cross-spawn": "^5.0.1",
     "del": "^2.2.2",
     "fs-extra": "^1.0.0",
     "q": "^1.4.1",
