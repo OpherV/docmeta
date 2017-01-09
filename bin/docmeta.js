@@ -2,7 +2,7 @@
 
 const path = require('path');
 const simpleGit= require('simple-git');
-const git = simpleGit(__dirname);
+const git = simpleGit(process.cwd());
 const fs = require('fs-extra');
 const del = require('del');
 const pwd = path.resolve(process.cwd());
