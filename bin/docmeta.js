@@ -86,7 +86,7 @@ function deployDocs(){
 
 let generateRedirectFile = wrapSyncFunctionWithPromise(function(data){
     let redirectVersion = data.latest?data.latest:data.versions[0];
-
+    console.log('redirect version', redirectVersion );
     let redirectTemplate = `<script>document.location='${redirectVersion}/index.html'</script>`;
     fs.writeFileSync(path.join(DIRS.out,'index.html'),redirectTemplate);
 });
@@ -100,6 +100,8 @@ function generateDocsForAllVersions(){
     let promises = [];
 
     git.tags(function(err,tags){
+        console.log("available tags", tags);
+
         //push all tags to be built, except if defined otherwise in the ignoreTags options
         for (let tag of tags.all){
             if (options.ignoreTags.indexOf(tag) == -1) {
@@ -121,7 +123,8 @@ function generateDocsForAllVersions(){
         q.all(promises).then(function(){
             deferred.resolve({
                 versions: docVersions,
-                latest: tags.latest
+                // is the latest a non ignored tag? if not use develop
+                latest: tags.latest in docVersions?tags.latest:'develop'
             });
         })
 
