@@ -15,7 +15,7 @@ let options = {
     deployRepoURL: "git@github.com:lance-gg/lance-docs-site.git",
     buildDocCommand: "npm",
     buildDocCommandArgs: "run docs",
-    ignoreTags: ['r0.1.0', 'r0.2.0']
+    ignoreTags: ['r0.1.0', 'r0.2.0', 'r0.9.1', 'r0.9.3', 'r1.0.0']
 };
 
 
