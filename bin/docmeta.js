@@ -8,7 +8,7 @@ const del = require('del');
 const pwd = path.resolve(process.cwd());
 const q = require('q');
 const argv = require('yargs').argv;
-
+const replace = require('replace-in-file');
 
 let options = {
     repoURL: "https://github.com/lance-gg/lance.git",
@@ -64,7 +64,7 @@ function deployDocs(){
         console.log(`Done cloning`);
 
         //remove everything but the git
-        del.sync(['!'+path.join(DIRS.temp_deploy,'.git/'), '!'+path.join(DIRS.temp_deploy,'CNAME'), path.join(DIRS.temp_deploy,'*') ]);
+        del.sync(['!'+path.join(DIRS.temp_deploy,'.git/'), path.join(DIRS.temp_deploy,'*') ]);
         del.sync([path.join(DIRS.temp_deploy,'.gitignore')]);
         fs.copySync(path.join(pwd, DIRS.out), path.join(pwd, DIRS.temp_deploy));
 
@@ -85,10 +85,22 @@ function deployDocs(){
 }
 
 let generateRedirectFile = wrapSyncFunctionWithPromise(function(data){
-    let redirectVersion = data.latest?data.latest:data.versions[0];
+    let redirectVersion = data.latest;
     console.log('redirect version', redirectVersion );
-    let redirectTemplate = `<script>document.location='${redirectVersion}/index.html'</script>`;
-    fs.writeFileSync(path.join(DIRS.out,'index.html'),redirectTemplate);
+
+    const options = {
+        files: path.join(DIRS.out,'index.html'),
+        from: '${LANCEVERSION}',
+        to: redirectVersion
+    };
+
+    const changes = replace.sync(options);
+    console.log('Modified files:', changes.join(', '));
+});
+
+let generateDefaultFiles = wrapSyncFunctionWithPromise(function (){
+    console.log('copying docmeta default files', path.join(pwd, '/node_modules/docmeta/src'), path.join(pwd, DIRS.out));
+    fs.copySync(path.join(pwd, './node_modules/docmeta/src'), path.join(pwd, DIRS.out));
 });
 
 function generateDocsForAllVersions(){
@@ -200,6 +212,7 @@ function run_cmd(cmd, args, callBack ) {
 let defer = q.defer();
 p = defer.promise;
 if (!argv.nocleanup){ p = p.then(cleanup); }
+p = p.then(generateDefaultFiles);
 p = p.then(generateDocsForAllVersions);
 p = p.then(generateRedirectFile);
 if (argv.deploy){ p = p.then(deployDocs); }
