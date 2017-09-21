@@ -111,20 +111,24 @@ function generateDocsForAllVersions(){
         docVersions.push('develop');
 
 
-        for (let version of docVersions) {
-            console.log(`generating docs for version ${version}`);
-            let promise = generateDocsForVersion(version).then(function(){
-                console.log(`done generating docs for version ${version}`);
-            });
+        if (!argv.nodocs) {
+            for (let version of docVersions) {
+                console.log(`generating docs for version ${version}`);
+                let promise = generateDocsForVersion(version).then(function () {
+                    console.log(`done generating docs for version ${version}`);
+                });
 
-            promises.push(promise);
+                promises.push(promise);
+            }
         }
 
         q.all(promises).then(function(){
+            let latest = docVersions.length>0?docVersions[docVersions.length-2]:'develop';
+
             deferred.resolve({
                 versions: docVersions,
                 // is the latest a non ignored tag? if not use develop
-                latest: tags.latest in docVersions?tags.latest:'develop'
+                latest: latest
             });
         })
 
