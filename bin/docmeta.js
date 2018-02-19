@@ -15,7 +15,13 @@ let options = {
     deployRepoURL: "git@github.com:lance-gg/lance-docs-site.git",
     buildDocCommand: "npm",
     buildDocCommandArgs: "run docs",
-    ignoreTags: ['r0.1.0', 'r0.2.0', 'r0.9.1', 'r0.9.3', 'r1.0.0']
+    ignoreTags: ['r0.1.0', 'r0.2.0', 'r0.9.1', 'r0.9.3', 'r1.0.0',
+        'r1.0.4',
+        'r1.0.5',
+        'r1.0.6',
+        'r1.0.8',
+        'r1.0.9'
+    ]
 };
 
 
@@ -165,16 +171,20 @@ function generateDocsForVersion(name){
         ],afterClone);
 
     function afterClone(){
+        // console.log('after clone for version', name);
+        // console.log('running npm install in versionpath', versionPath);
         process.chdir(versionPath);
         run_cmd('npm', ['install'], afterNpmInstall);
     }
 
     function afterNpmInstall(){
+        // console.log('after npm install for version', name);
         process.chdir(versionPath);
         run_cmd(options.buildDocCommand, ['run', 'docs'], afterBuildDocsCommand)
     }
 
     function afterBuildDocsCommand(){
+        // console.log('after build docs for version', name);
         process.chdir(pwd);
         fs.copySync(path.join(versionPath,DIRS.inner_out), path.join(DIRS.out,name));
         deferred.resolve();
